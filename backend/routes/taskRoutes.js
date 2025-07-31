@@ -6,7 +6,7 @@ const protect = require("../middleware/authMiddleware");
 router.use(protect);
 
 router.post("/", taskController.createTask);
-router.get("/", protect, taskController.getTasks);
+router.get("/", taskController.getTasks);
 router.put("/:id", taskController.updateTask);
 router.delete("/:id", taskController.deleteTask);
 router.patch("/:id/complete", taskController.toggleComplete);

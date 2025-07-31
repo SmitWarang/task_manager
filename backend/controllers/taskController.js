@@ -12,7 +12,7 @@ exports.createTask = async (req, res) => {
 
 exports.getTasks = async (req, res) => {
   const { category, priority, completed } = req.query;
-  const filter = { user: req.user._id };
+  const filter = { userId: req.user._id };
 
   if (category) filter.category = category;
   if (priority) filter.priority = priority;
@@ -28,9 +28,11 @@ exports.getTasks = async (req, res) => {
 
 exports.updateTask = async (req, res) => {
   try {
-    const updated = await Task.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const updated = await Task.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user._id },
+      req.body,
+      { new: true }
+    );
     if (!updated) return res.status(404).json({ message: "Task not found" });
     res.json(updated);
   } catch (err) {
@@ -40,7 +42,10 @@ exports.updateTask = async (req, res) => {
 
 exports.deleteTask = async (req, res) => {
   try {
-    const deleted = await Task.findByIdAndDelete(req.params.id);
+    const deleted = await Task.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.user._id,
+    });
     if (!deleted) return res.status(404).json({ message: "Task not found" });
     res.json({ message: "Deleted successfully" });
   } catch (err) {
@@ -50,7 +55,10 @@ exports.deleteTask = async (req, res) => {
 
 exports.toggleComplete = async (req, res) => {
   try {
-    const task = await Task.findById(req.params.id);
+    const task = await Task.findOne({
+      _id: req.params.id,
+      userId: req.user._id,
+    });
     if (!task) return res.status(404).json({ message: "Task not found" });
 
     task.completed = !task.completed;

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../services/api";
 import TaskForm from "../components/TaskForm";
@@ -17,7 +17,7 @@ function HomePage() {
   });
   const [editTask, setEditTask] = useState(null);
 
-  const fetchTasks = useCallback(async () => {
+  const fetchTasks = async () => {
     try {
       const params = {};
       if (filters.category) params.category = filters.category;
@@ -29,12 +29,13 @@ function HomePage() {
     } catch (err) {
       console.error(err);
     }
-  }, [filters]);
+  };
 
   useEffect(() => {
     if (!user) return navigate("/login");
     fetchTasks();
-  }, [filters, fetchTasks, navigate, user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters]);
 
   const handleAdd = async (form) => {
     try {
@@ -61,21 +62,30 @@ function HomePage() {
   };
 
   return (
-    <div>
-      {user ? <h2>Welcome, {user.name}</h2> : <h2>Welcome</h2>}
-      <button
-        onClick={() => {
-          localStorage.removeItem("user");
-          navigate("/login");
-        }}>
-        Logout
-      </button>
+    <div className="container">
+      <div className="header">
+        {user ? (
+          <h2 className="welcome-text">Welcome, {user.name}</h2>
+        ) : (
+          <h2 className="welcome-text">Welcome</h2>
+        )}
+        <button
+          className="logout-btn"
+          onClick={() => {
+            localStorage.removeItem("user");
+            navigate("/login");
+          }}>
+          Logout
+        </button>
+      </div>
 
       <Filters filters={filters} setFilters={setFilters} />
       <TaskForm onSubmit={handleAdd} initialData={editTask} />
 
       {tasks.length === 0 ? (
-        <p>No tasks found.</p>
+        <div className="no-tasks">
+          <p>No tasks found. Create your first task above!</p>
+        </div>
       ) : (
         tasks.map((task) => (
           <TaskItem
